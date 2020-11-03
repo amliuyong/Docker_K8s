@@ -96,3 +96,6 @@ server {
     }
 }
 ```
+
+## AWS EB deploy
+![](./aws_deploy.jpg)
