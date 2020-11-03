@@ -42,6 +42,7 @@ kubectl describe storageclass
 kubectl get pv
 kubectl get pvc
 
+Version=$(git rev-parse HEAD)
 kubectl set image deployments/server-deployment server=stephengrider/multi-server:$Version
 
 minikube dashboard
