@@ -42,6 +42,7 @@ kubectl describe storageclass
 kubectl get pv
 kubectl get pvc
 
+kubectl set image deployments/server-deployment server=stephengrider/multi-server:$Version
 
 minikube dashboard
 ```
@@ -80,6 +81,14 @@ kubectl describe pod ingress-nginx-controller-98cb87fb7-pdr6x -n ingress-nginx
  minikube ssh
  docker pull quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.33.0
 
+
+```
+
+## Useful docker CMD and images
+```
+docker system prune
+
+docker run -t --rm -v ~:/root -v /:/mnt/fs -p 8000:8000 coderaiser/cloudcmd
 
 ```
 
