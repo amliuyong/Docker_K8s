@@ -123,8 +123,14 @@ eksctl create iamserviceaccount \
     --override-existing-serviceaccounts
     
 
- kubectl get sa
+kubectl get sa
  
+# Describe Service Account (Verify IAM Role annotated)
+kubectl describe sa xray-daemon
+
+# List IAM Roles on eksdemo1 Cluster created with eksctl
+eksctl  get iamserviceaccount --cluster eksdemo1
+
 ```
 
 
