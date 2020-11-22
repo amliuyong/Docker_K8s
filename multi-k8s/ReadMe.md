@@ -121,6 +121,10 @@ eksctl create iamserviceaccount \
     --attach-policy-arn arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess \
     --approve \
     --override-existing-serviceaccounts
+    
+
+ kubectl get sa
+ 
 ```
 
 
