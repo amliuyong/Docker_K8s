@@ -28,6 +28,7 @@ kubectl get ingresses
 kubectl get ep
 
 kubectl logs <pod id>
+kubectl logs -f $(kubectl get po | egrep -o 'usermgmt-microservice-[A-Za-z0-9-]+')
 
 kubectl delete deployment client-deployment
 
@@ -91,6 +92,16 @@ docker system prune
 
 docker run -t --rm -v ~:/root -v /:/mnt/fs -p 8000:8000 coderaiser/cloudcmd
 
+```
+## Connect to MySQL
+```
+kubectl run -it --rm --image=mysql:5.7.22 --restart=Never mysql-client -- mysql -h usermgmtdb.c7hldelt9xfp.us-east-1.rds.amazonaws.com -u dbadmin -pdbpassword11
+
+
+mysql> show schemas;
+mysql> create database usermgmt;
+mysql> show schemas;
+mysql> exit
 ```
 
 ## Entrie Deployment Flow
