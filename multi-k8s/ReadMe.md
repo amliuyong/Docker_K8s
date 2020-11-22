@@ -104,6 +104,14 @@ mysql> show schemas;
 mysql> exit
 ```
 
+
+## Generate Load
+```
+kubectl run --generator=run-pod/v1 apache-bench -i --tty --rm --image=httpd -- ab -n 500000 -c 1000 http://<Service-Name>.default.svc.cluster.local/ 
+```
+
+
+
 ## Entrie Deployment Flow
 
 ![Entrie Flow](./jpgs/k8s_overview.jpg)
