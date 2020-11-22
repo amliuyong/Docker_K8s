@@ -112,6 +112,16 @@ mysql> exit
 kubectl run --generator=run-pod/v1 apache-bench -i --tty --rm --image=httpd -- ab -n 500000 -c 1000 http://<Service-Name>.default.svc.cluster.local/ 
 ```
 
+## Create iamserviceaccount
+```
+eksctl create iamserviceaccount \
+    --name xray-daemon \
+    --namespace default \
+    --cluster eksdemo1 \
+    --attach-policy-arn arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess \
+    --approve \
+    --override-existing-serviceaccounts
+```
 
 
 ## Entrie Deployment Flow
