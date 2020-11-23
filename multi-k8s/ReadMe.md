@@ -751,3 +751,30 @@ spec:
    
    https://github.com/amliuyong/aws-eks-kubernetes-masterclass/tree/master/08-ELB-Application-LoadBalancers/08-06-ALB-Ingress-ExternalDNS/08-06-01-Deploy-ExternalDNS-on-EKS
    
+
+## Rollout New Deploymen
+```
+
+# Rollout New Deployment by updating yaml manifest 2.0.0
+kubectl apply -f kube-manifests/
+
+# Verify Rollout Status
+kubectl rollout status deployment/notification-microservice
+
+# Verify ReplicaSets
+kubectl get rs
+
+# Verify Rollout History
+kubectl rollout history deployment/notification-microservice
+
+# Access Application (Should see V2)
+https://services.kubeoncloud.com/usermgmt/notification-health-status
+
+# Roll back to Previous Version
+kubectl rollout undo deployment/notification-microservice
+
+# Access Application (Should see V1)
+https://services.kubeoncloud.com/usermgmt/notification-health-status
+
+```
+
