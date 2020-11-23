@@ -103,6 +103,35 @@ eksctl utils associate-iam-oidc-provider \
     --approve
 ```    
 
+## update kubectl context 
+```
+
+cluster_name=photowall-eks-cluster-dev
+aws eks update-kubeconfig --name $cluster_name
+
+kubectl config view --minify
+
+
+https://stackoverflow.com/questions/50791303/kubectl-error-you-must-be-logged-in-to-the-server-unauthorized-when-accessing
+
+cluster_name=photowall-eks-cluster-dev
+aws eks update-kubeconfig --name $cluster_name \
+--role-arn  arn:aws:iam::717087451485:role/PhotowallCodepipelineBuildPojectRole
+
+
+```
+
+## Get the IAM role Worker Nodes 
+```
+# Get Worker node IAM Role ARN
+kubectl -n kube-system describe configmap aws-auth
+
+# from output check rolearn
+rolearn: arn:aws:iam::180789647333:role/eksctl-eksdemo1-nodegroup-eksdemo-NodeInstanceRole-IJN07ZKXAWNN
+
+```
+
+
 ## Run the Project
 ```
 cd /Users/yongliu/docker_course/multi-k8s
@@ -401,6 +430,81 @@ kubectl create secret  generic pgpassword \
 
 kubectl get secrets
 ```
+## Secret in yaml 
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-db-password
+#type: Opaque means that from kubernetes's point of view the contents of this Secret is unstructured.
+#It can contain arbitrary key-value pairs. 
+type: Opaque
+data:
+  # Output of echo -n 'dbpassword11' | base64
+  db-password: ZGJwYXNzd29yZDEx
+  
+  
+---
+
+            env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-db-password
+                  key: db-password
+                  
+```
+
+## Init Containers & livenessProbe & readinessProbe
+```yaml
+
+template:
+    metadata:
+      labels:
+        app: usermgmt-restapp
+    spec:
+      initContainers:
+        - name: init-db
+          image: busybox:1.31
+          command: ['sh', '-c', 'echo -e "Checking for the availability of MySQL Server deployment"; while ! nc -z mysql 3306; do sleep 1; printf "-"; done; echo -e "  >> MySQL DB Server has started";']
+          
+---
+
+ livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - nc -z localhost 8095
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            
+---
+
+  readinessProbe:
+            httpGet:
+              path: /usermgmt/health-status
+              port: 8095
+            initialDelaySeconds: 60
+            periodSeconds: 10     
+            
+
+---
+
+   resources:
+            requests:
+              memory: "128Mi" # 128 MebiByte is equal to 135 Megabyte (MB)
+              cpu: "500m" # `m` means milliCPU
+            limits:
+              memory: "500Mi"
+              cpu: "1000m"  # 1000m is equal to 1 VCPU core                                          
+              
+
+
+```
+
+
+
 
 
 ## Load Balancer
