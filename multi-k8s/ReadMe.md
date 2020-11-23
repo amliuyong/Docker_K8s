@@ -531,23 +531,52 @@ metadata:
   name: dev3
   
 ```
-## ResourceQuota for namespace
-```
-piVersion: v1
+## LimitRange and ResourceQuota for namespace
+```yaml
+
+
+
+apiVersion: v1
+kind: Namespace
+metadata: 
+  name: dev3
+---  
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-cpu-mem-limit-range
+  namespace: dev3
+spec:
+  limits:
+    - default:
+        cpu: "500m"  # If not specified default limit is 1 vCPU per container     
+        memory: "512Mi" # If not specified the Container's memory limit is set to 512Mi, which is the default memory limit for the namespace.
+      defaultRequest:
+        cpu: "300m" # If not specified default it will take from whatever specified in limits.default.cpu      
+        memory: "256Mi" # If not specified default it will take from whatever specified in limits.default.memory
+      type: Container 
+      
+
+
+---
+apiVersion: v1
 kind: ResourceQuota
 metadata:
   name: ns-resource-quota
   namespace: dev3
 spec:
-  limits:
-    - default:
-        memory: "512Mi" # If not specified the Container's memory limit is set to 512Mi, which is the default memory limit for the namespace.
-        cpu: "500m"  # If not specified default limit is 1 vCPU per container 
-      defaultRequest:
-        memory: "256Mi" # If not specified default it will take from whatever specified in limits.default.memory
-        cpu: "300m" # If not specified default it will take from whatever specified in limits.default.cpu
-      type: Container                        
-
+  hard:
+    requests.cpu: "1"
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 2Gi  
+    pods: "5"    
+    configmaps: "5" 
+    persistentvolumeclaims: "5" 
+    replicationcontrollers: "5" 
+    secrets: "5" 
+    services: "5" 
+    
 ```
 
 
