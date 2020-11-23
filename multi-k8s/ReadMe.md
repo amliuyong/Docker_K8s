@@ -503,7 +503,52 @@ template:
 
 ```
 
+## Namesapce
 
+```
+# List Namespaces
+kubectl get ns 
+
+# Craete Namespace
+kubectl create namespace <namespace-name>
+kubectl create namespace dev1
+kubectl create namespace dev2
+
+
+kubectl apply -f kube-manifests/ -n dev1
+kubectl apply -f kube-manifests/ -n dev2
+
+# List all objects from dev1 & dev2 Namespaces
+kubectl get all -n dev1
+kubectl get all -n dev2
+
+
+```
+```yaml
+piVersion: v1
+kind: Namespace
+metadata:
+  name: dev3
+  
+```
+## ResourceQuota for namespace
+```
+piVersion: v1
+kind: ResourceQuota
+metadata:
+  name: ns-resource-quota
+  namespace: dev3
+spec:
+  limits:
+    - default:
+        memory: "512Mi" # If not specified the Container's memory limit is set to 512Mi, which is the default memory limit for the namespace.
+        cpu: "500m"  # If not specified default limit is 1 vCPU per container 
+      defaultRequest:
+        memory: "256Mi" # If not specified default it will take from whatever specified in limits.default.memory
+        cpu: "300m" # If not specified default it will take from whatever specified in limits.default.cpu
+      type: Container                        
+
+```
 
 
 
