@@ -51,6 +51,58 @@ kubectl set image deployments/server-deployment server=stephengrider/multi-serve
 minikube dashboard
 ```
 
+## Create EKS Node Group in Private Subnets
+
+```
+eksctl get nodegroup --cluster=<Cluster-Name>
+eksctl get nodegroup --cluster=eksdemo1
+
+eksctl delete nodegroup <NodeGroup-Name> --cluster <Cluster-Name>
+eksctl delete nodegroup eksdemo1-ng-public1 --cluster eksdemo1
+ 
+eksctl create nodegroup --cluster=eksdemo1 \
+                        --region=us-east-1 \
+                        --name=eksdemo1-ng-private1 \
+                        --node-type=t3.medium \
+                        --nodes-min=2 \
+                        --nodes-max=4 \
+                        --node-volume-size=20 \
+                        --ssh-access \
+                        --ssh-public-key=kube-demo \
+                        --managed \
+                        --asg-access \
+                        --external-dns-access \
+                        --full-ecr-access \
+                        --appmesh-access \
+                        --alb-ingress-access \
+                        --node-private-networking   
+kubectl get nodes -o wide
+
+
+# Create Cluster without-nodegroup
+eksctl create cluster --name=eksdemo1 \
+                      --region=us-east-1 \
+                      --zones=us-east-1a,us-east-1b \
+                      --without-nodegroup 
+
+# Get List of clusters
+eksctl get clusters  
+
+```
+
+
+## Create & Associate IAM OIDC Provider for our EKS Cluster
+  
+  To enable and use AWS IAM roles for Kubernetes service accounts on our EKS cluster, we must create & associate OIDC identity provider.
+
+```
+# Replace with region & cluster name
+eksctl utils associate-iam-oidc-provider \
+    --region us-east-1 \
+    --cluster eksdemo1 \
+    --approve
+```    
+
 ## Run the Project
 ```
 cd /Users/yongliu/docker_course/multi-k8s
