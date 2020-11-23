@@ -579,10 +579,103 @@ spec:
     
 ```
 
+## ExternalName Service
 
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  type: ExternalName
+  externalName: usermgmtdb.c7hldelt9xfp.us-east-1.rds.amazonaws.com
+```  
+
+## Amazon EBS CSI Driver
+
+https://github.com/amliuyong/aws-eks-kubernetes-masterclass/tree/master/04-EKS-Storage-with-EBS-ElasticBlockStore
+
+```
+
+# Get Worker node IAM Role ARN
+kubectl -n kube-system describe configmap aws-auth
+
+# from output check rolearn
+rolearn: arn:aws:iam::180789647333:role/eksctl-eksdemo1-nodegroup-eksdemo-NodeInstanceRole-IJN07ZKXAWNN
+
+# Attach Policy to role
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:AttachVolume",
+        "ec2:CreateSnapshot",
+        "ec2:CreateTags",
+        "ec2:CreateVolume",
+        "ec2:DeleteSnapshot",
+        "ec2:DeleteTags",
+        "ec2:DeleteVolume",
+        "ec2:DescribeInstances",
+        "ec2:DescribeSnapshots",
+        "ec2:DescribeTags",
+        "ec2:DescribeVolumes",
+        "ec2:DetachVolume"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+
+# Deploy EBS CSI Driver
+kubectl apply -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/?ref=master"
+
+# Verify ebs-csi pods running
+kubectl get pods -n kube-system
+
+```
 
 ## Load Balancer
 ![](./jpgs/lb.jpg)
+
+```yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: clb-usermgmt-restapp
+  labels:
+    app: usermgmt-restapp
+spec:
+  type: LoadBalancer  # Regular k8s Service manifest with type as LoadBalancer
+  selector:
+    app: usermgmt-restapp     
+  ports:
+  - port: 80
+    targetPort: 8095
+    
+    
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nlb-usermgmt-restapp
+  labels:
+    app: usermgmt-restapp
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb    # To create Network Load Balancer
+spec:
+  type: LoadBalancer # Regular k8s Service manifest with type as LoadBalancer
+  selector:
+    app: usermgmt-restapp     
+  ports:
+  - port: 80
+    targetPort: 8095
+    
+    
+```
 
 ## Ingress 
 
@@ -591,3 +684,67 @@ spec:
 ![](./jpgs/ingress-on-google-cloud.jpg)
 
 https://kubernetes.github.io/ingress-nginx/deploy/
+
+https://github.com/amliuyong/aws-eks-kubernetes-masterclass/tree/master/08-ELB-Application-LoadBalancers
+
+ 1.  ALB Install Ingress Controller
+ https://github.com/amliuyong/aws-eks-kubernetes-masterclass/tree/master/08-ELB-Application-LoadBalancers/08-01-ALB-Ingress-Install
+
+ 2. AWS ALB Ingress Controller - Implement HTTP to HTTPS Redirect 
+https://kubernetes-sigs.github.io/aws-alb-ingress-controller/guide/ingress/annotation/
+
+
+```yaml
+
+# Annotations Reference:  https://kubernetes-sigs.github.io/aws-alb-ingress-controller/guide/ingress/annotation/
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-usermgmt-restapp-service
+  labels:
+    app: usermgmt-restapp
+  annotations:
+    # Ingress Core Settings  
+    kubernetes.io/ingress.class: "alb"
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    # Health Check Settings
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP 
+    alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+    #Important Note:  Need to add health check path annotations in service level if we are planning to use multiple targets in a load balancer    
+    #alb.ingress.kubernetes.io/healthcheck-path: /usermgmt/health-status
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '15'
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
+    alb.ingress.kubernetes.io/success-codes: '200'
+    alb.ingress.kubernetes.io/healthy-threshold-count: '2'
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
+    ## SSL Settings
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}, {"HTTP":80}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:180789647333:certificate/9f042b5d-86fd-4fad-96d0-c81c5abc71e1
+    #alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-1-2017-01 #Optional (Picks default if not used)    
+    # SSL Redirect Setting
+    alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'   
+spec:
+  rules:
+    #- host: ssldemo.kubeoncloud.com    # SSL Setting (Optional only if we are not using certificate-arn annotation)
+    - http:
+        paths:
+          - path: /* # SSL Redirect Setting
+            backend:
+              serviceName: ssl-redirect
+              servicePort: use-annotation            
+          - path: /app1/*
+            backend:
+              serviceName: app1-nginx-nodeport-service
+              servicePort: 80                        
+          - path: /app2/*
+            backend:
+              serviceName: app2-nginx-nodeport-service
+              servicePort: 80            
+          - path: /*
+            backend:
+              serviceName: usermgmt-restapp-nodeport-service
+              servicePort: 8095              
+# Important Note-1: In path based routing order is very important, if we are going to use  "/*", try to use it at the end of all rules. 
+
+```
+   3. External DNS - Used for Updating Route53 RecordSets from Kubernetes
