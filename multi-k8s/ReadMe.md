@@ -748,3 +748,6 @@ spec:
 
 ```
    3. External DNS - Used for Updating Route53 RecordSets from Kubernetes
+   
+   https://github.com/amliuyong/aws-eks-kubernetes-masterclass/tree/master/08-ELB-Application-LoadBalancers/08-06-ALB-Ingress-ExternalDNS/08-06-01-Deploy-ExternalDNS-on-EKS
+   
