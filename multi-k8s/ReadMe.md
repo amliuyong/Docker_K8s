@@ -752,7 +752,7 @@ spec:
    https://github.com/amliuyong/aws-eks-kubernetes-masterclass/tree/master/08-ELB-Application-LoadBalancers/08-06-ALB-Ingress-ExternalDNS/08-06-01-Deploy-ExternalDNS-on-EKS
    
 
-## Rollout New Deploymen
+## Rollout New Deployment
 ```
 
 # Rollout New Deployment by updating yaml manifest 2.0.0
@@ -777,4 +777,126 @@ kubectl rollout undo deployment/notification-microservice
 https://services.kubeoncloud.com/usermgmt/notification-health-status
 
 ```
+
+## Codepipeline 
+
+### Create STS Assume IAM Role for CodeBuild to interact with AWS EKS
+```
+# Export your Account ID
+export ACCOUNT_ID=xxxxxxxxxxx
+
+# Set Trust Policy
+TRUST="{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::${ACCOUNT_ID}:root\" }, \"Action\": \"sts:AssumeRole\" } ] }"
+
+# Verify inside Trust policy, your account id got replacd
+echo $TRUST
+
+# Create IAM Role for CodeBuild to Interact with EKS
+aws iam create-role --role-name EksCodeBuildKubectlRole --assume-role-policy-document "$TRUST" --output text --query 'Role.Arn'
+
+# Define Inline Policy with eks Describe permission in a file iam-eks-describe-policy
+echo '{ "Version": "2012-10-17", "Statement": [ { "Effect": "Allow", "Action": "eks:Describe*", "Resource": "*" } ] }' > /tmp/iam-eks-describe-policy
+
+# Associate Inline Policy to our newly created IAM Role
+aws iam put-role-policy --role-name EksCodeBuildKubectlRole --policy-name eks-describe --policy-document file:///tmp/iam-eks-describe-policy
+
+# Verify the same on Management Console
+```
+### Update EKS Cluster aws-auth ConfigMap with new role created in previous step
+```
+# Verify what is present in aws-auth configmap before change
+kubectl get configmap aws-auth -o yaml -n kube-system
+
+# Export your Account ID
+export ACCOUNT_ID=180789647333
+
+# Set ROLE value
+ROLE="    - rolearn: arn:aws:iam::$ACCOUNT_ID:role/EksCodeBuildKubectlRole\n      username: build\n      groups:\n        - system:masters"
+
+# Get current aws-auth configMap data and attach new role info to it
+kubectl get -n kube-system configmap/aws-auth -o yaml | awk "/mapRoles: \|/{print;print \"$ROLE\";next}1" > /tmp/aws-auth-patch.yml
+
+# Patch the aws-auth configmap with new role
+kubectl patch configmap/aws-auth -n kube-system --patch "$(cat /tmp/aws-auth-patch.yml)"
+
+# Verify what is updated in aws-auth configmap after change
+kubectl get configmap aws-auth -o yaml -n kube-system
+
+```
+
+### Review the buildspec.yml for CodeBuild
+```yaml
+version: 0.2
+phases:
+  install:
+    commands:
+      - echo "Install Phase - Nothing to do using latest Amazon Linux Docker Image for CodeBuild which has all AWS Tools - https://github.com/aws/aws-codebuild-docker-images/blob/master/al2/x86_64/standard/3.0/Dockerfile"
+  pre_build:
+      commands:
+        # Docker Image Tag with Date Time & Code Buiild Resolved Source Version
+        - TAG="$(date +%Y-%m-%d.%H.%M.%S).$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | head -c 8)"
+        # Update Image tag in our Kubernetes Deployment Manifest        
+        - echo "Update Image tag in kube-manifest..."
+        - sed -i 's@CONTAINER_IMAGE@'"$REPOSITORY_URI:$TAG"'@' kube-manifests/01-DEVOPS-Nginx-Deployment.yml
+        # Verify AWS CLI Version        
+        - echo "Verify AWS CLI Version..."
+        - aws --version
+        # Login to ECR Registry for docker to push the image to ECR Repository
+        - echo "Login in to Amazon ECR..."
+        - $(aws ecr get-login --no-include-email)
+        # Update Kube config Home Directory
+        - export KUBECONFIG=$HOME/.kube/config
+  build:
+    commands:
+      # Build Docker Image
+      - echo "Build started on `date`"
+      - echo "Building the Docker image..."
+      - docker build --tag $REPOSITORY_URI:$TAG .
+  post_build:
+    commands:
+      # Push Docker Image to ECR Repository
+      - echo "Build completed on `date`"
+      - echo "Pushing the Docker image to ECR Repository"
+      - docker push $REPOSITORY_URI:$TAG
+      - echo "Docker Image Push to ECR Completed -  $REPOSITORY_URI:$TAG"    
+      # Extracting AWS Credential Information using STS Assume Role for kubectl
+      - echo "Setting Environment Variables related to AWS CLI for Kube Config Setup"          
+      - CREDENTIALS=$(aws sts assume-role --role-arn $EKS_KUBECTL_ROLE_ARN --role-session-name codebuild-kubectl --duration-seconds 900)
+      - export AWS_ACCESS_KEY_ID="$(echo ${CREDENTIALS} | jq -r '.Credentials.AccessKeyId')"
+      - export AWS_SECRET_ACCESS_KEY="$(echo ${CREDENTIALS} | jq -r '.Credentials.SecretAccessKey')"
+      - export AWS_SESSION_TOKEN="$(echo ${CREDENTIALS} | jq -r '.Credentials.SessionToken')"
+      - export AWS_EXPIRATION=$(echo ${CREDENTIALS} | jq -r '.Credentials.Expiration')
+      # Setup kubectl with our EKS Cluster              
+      - echo "Update Kube Config"      
+      - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
+      # Apply changes to our Application using kubectl
+      - echo "Apply changes to kube manifests"            
+      - kubectl apply -f kube-manifests/
+      - echo "Completed applying changes to Kubernetes Objects"           
+      # Create Artifacts which we can use if we want to continue our pipeline for other stages
+      - printf '[{"name":"01-DEVOPS-Nginx-Deployment.yml","imageUri":"%s"}]' $REPOSITORY_URI:$TAG > build.json
+      # Additional Commands to view your credentials      
+      #- echo "Credentials Value is..  ${CREDENTIALS}"      
+      #- echo "AWS_ACCESS_KEY_ID...  ${AWS_ACCESS_KEY_ID}"            
+      #- echo "AWS_SECRET_ACCESS_KEY...  ${AWS_SECRET_ACCESS_KEY}"            
+      #- echo "AWS_SESSION_TOKEN...  ${AWS_SESSION_TOKEN}"            
+      #- echo "AWS_EXPIRATION...  $AWS_EXPIRATION"             
+      #- echo "EKS_CLUSTER_NAME...  $EKS_CLUSTER_NAME"             
+artifacts:
+  files: 
+    - build.json   
+    - kube-manifests/*
+```
+### Update CodeBuild Role to have access to STS Assume Role
+1. Create STS Assume Role Policy
+
+```
+Service: STS
+Actions: Under Write - Select AssumeRole
+Resources: Specific
+Specify ARN for Role: arn:aws:iam::xxxxxxxxxxx:role/EksCodeBuildKubectlRole
+
+```
+2. Associate Policy to CodeBuild Role
+
 
