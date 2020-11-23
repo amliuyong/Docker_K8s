@@ -900,3 +900,53 @@ Specify ARN for Role: arn:aws:iam::xxxxxxxxxxx:role/EksCodeBuildKubectlRole
 2. Associate Policy to CodeBuild Role
 
 
+## How to login cluster which is created by code pipeline
+
+
+If you run the code pipeline to create EKS clusters, the clusters were create by below CodeBuild role: 
+
+arn:aws:iam::xxxxxxxxxxx:role/PhotowallCodepipelineBuildPojectRole
+
+If you want to login the cluster and run kubectl commands, you need to do following configuration: 
+
+For example, your aws cli user is "eks-user", you can run `aws sts get-caller-identity` to verify your user name
+
+
+
+1. Add the assume role permission to the eks-user
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "sts:AssumeRole",
+            "Resource": "arn:aws:iam::xxxxxxxxxxx:role/PhotowallCodepipelineBuildPojectRole"
+        }
+    ]
+}
+```
+2. Edit below trust relationship on the role `PhotowallCodepipelineBuildPojectRole`, so that it will allow the eks-user to assume the role.
+```json
+{
+  "Version": "2008-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::xxxxxxxxxxx:user/eks-user"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+```
+3. update-kubeconfig in your local matchine
+```
+aws eks --region region-code update-kubeconfig --name <cluster_name> --role-arn arn:aws:iam::xxxxxxxxxxx:user/PhotowallCodepipelineBuildPojectRole
+
+<cluster_name> can be: photowall-eks-cluster-dev | photowall-eks-cluster-stage, run `eksctl get cluster` to verify
+```
+
+4. now, you can run kubectl commands as normal. run `kubectl get pods` to verify
