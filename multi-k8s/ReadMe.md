@@ -693,6 +693,68 @@ https://github.com/amliuyong/aws-eks-kubernetes-masterclass/tree/master/08-ELB-A
  2. AWS ALB Ingress Controller - Implement HTTP to HTTPS Redirect 
 https://kubernetes-sigs.github.io/aws-alb-ingress-controller/guide/ingress/annotation/
 
+### install aws-load-balancer-controller
+
+```sh
+#!/usr/bin/env bash
+
+clusterName=photowall-eks-cluster-${STAGE_NAME}
+
+CLUSTER=$clusterName
+
+echo ACCOUNT_ID=${ACCOUNT_ID}
+echo CLUSTER=$CLUSTER
+
+kubectl get deployment -n kube-system aws-load-balancer-controller
+
+if [[ $? -eq 0 ]];
+then
+   echo "aws-load-balancer-controller alreay installed"
+   exit 0;
+fi 
+
+eksctl utils associate-iam-oidc-provider \
+    --region ap-northeast-2 \
+    --cluster $CLUSTER \
+    --approve
+
+curl -o iam-policy.json https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/install/iam_policy.json
+
+aws iam create-policy \
+    --policy-name AWSLoadBalancerControllerIAMPolicy-${STAGE_NAME} \
+    --policy-document file://iam-policy.json
+
+LBARN=arn:aws:iam::${ACCOUNT_ID}:policy/AWSLoadBalancerControllerIAMPolicy-${STAGE_NAME}
+
+eksctl create iamserviceaccount \
+  --cluster=$CLUSTER \
+  --namespace=kube-system \
+  --name=aws-load-balancer-controller \
+  --attach-policy-arn=$LBARN\
+  --override-existing-serviceaccounts \
+  --approve
+
+kubectl apply -k "github.com/aws/eks-charts/stable/aws-load-balancer-controller//crds?ref=master"
+
+## Install helm
+
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+helm repo add eks https://aws.github.io/eks-charts
+
+
+helm upgrade -i aws-load-balancer-controller eks/aws-load-balancer-controller \
+  --set clusterName=$CLUSTER \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  -n kube-system
+
+kubectl get deployment -n kube-system aws-load-balancer-controller
+
+# kubectl logs -n kube-system deployment.apps/aws-load-balancer-controller
+
+```
 
 ```yaml
 
