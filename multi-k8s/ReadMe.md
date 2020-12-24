@@ -989,6 +989,8 @@ For example, your aws cli user is "eks-user", you can run `aws sts get-caller-id
 }
 ```
 2. Edit below trust relationship on the role `PhotowallCodepipelineBuildPojectRole`, so that it will allow the eks-user to assume the role.
+
+  // Trust Relationship of the role
 ```json
 {
   "Version": "2008-10-17",
