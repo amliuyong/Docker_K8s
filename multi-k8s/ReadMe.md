@@ -1026,3 +1026,8 @@ aws eks --region region-code update-kubeconfig --name <cluster_name> --role-arn 
 ```
 
 4. now, you can run kubectl commands as normal. run `kubectl get pods` to verify
+
+
+# ES on K8s, vagrant
+https://github.com/amliuyong/esNote/blob/master/ESonK8s_Notes.md
+
