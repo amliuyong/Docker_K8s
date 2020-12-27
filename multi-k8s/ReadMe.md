@@ -323,6 +323,8 @@ spec:
 ## Node port
 ![](./jpgs/node-port.jpg)
 
+![](./jpgs/node_port_svc.jpg)
+
 
 ## Connecting to Running Containers
 ![Connecting to Running Containers](./jpgs/node-port-service.jpg)
