@@ -324,6 +324,7 @@ spec:
 ![](./jpgs/node-port.jpg)
 
 ![node port svc](./jpgs/node_port_svc.jpg)
+![access node port svc](./jpgs/access_node_prot_svc.jpg)
 
 
 ## Connecting to Running Containers
