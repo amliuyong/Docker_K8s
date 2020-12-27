@@ -27,6 +27,8 @@ kubectl get pods
 kubectl get ingresses
 kubectl get ep
 
+kubectl exec -it [pod_name] [cmd]
+
 kubectl logs <pod id>
 kubectl logs -f $(kubectl get po | egrep -o 'usermgmt-microservice-[A-Za-z0-9-]+')
 
