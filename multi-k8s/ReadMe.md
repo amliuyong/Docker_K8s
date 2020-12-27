@@ -50,6 +50,8 @@ kubectl scale --replicas=30 deploy ca-demo-deployment
 
 Version=$(git rev-parse HEAD)
 kubectl set image deployments/server-deployment server=stephengrider/multi-server:$Version
+// force to pull new images
+kubectl rollout restart deployment
 
 minikube dashboard
 ```
