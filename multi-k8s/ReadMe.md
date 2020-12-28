@@ -1028,6 +1028,14 @@ aws eks --region region-code update-kubeconfig --name <cluster_name> --role-arn 
 4. now, you can run kubectl commands as normal. run `kubectl get pods` to verify
 
 
-# ES on K8s, vagrant
+# ES on K8s, vagrant, skaffold
 https://github.com/amliuyong/esNote/blob/master/ESonK8s_Notes.md
+
+- skaffold
+https://github.com/amliuyong/react-microservices/blob/main/01_A-Mini-Microservices-App/skaffold.yaml
+
+```
+skaffold dev
+
+```
 
