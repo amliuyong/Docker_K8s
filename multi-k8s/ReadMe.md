@@ -202,6 +202,14 @@ mysql> exit
 kubectl run --generator=run-pod/v1 apache-bench -i --tty --rm --image=httpd -- ab -n 500000 -c 1000 http://<Service-Name>.default.svc.cluster.local/ 
 ```
 
+## cross namespace access in the cluster
+```
+http://<Service-Name>.<namespace>.svc.cluster.local/ 
+
+http://my-release-ingress-nginx-controller.default.svc.cluster.local
+
+```
+
 ## Create iamserviceaccount
 ```
 eksctl create iamserviceaccount \
