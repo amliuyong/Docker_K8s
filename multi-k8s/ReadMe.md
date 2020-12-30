@@ -28,6 +28,8 @@ kubectl get ingresses
 kubectl get ep
 
 kubectl exec -it [pod_name] [cmd]
+e.g: kubectl exec -it auth-depl-9889dbb7c-hk56c sh
+
 kubectl describe pod [pod_name] 
 
 kubectl logs <pod id>
