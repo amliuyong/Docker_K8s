@@ -55,9 +55,11 @@ kubectl set image deployments/server-deployment server=stephengrider/multi-serve
 
 // force to pull new images for all
 kubectl rollout restart deployment
-
 kubectl rollout restart deployment  [deployment]
 
+// port-forward, similar to NodePort svc, used for temp test
+kubectl port-forward nats-depl-b946946dd-2zns2 4222:4222
+ 
 
 minikube dashboard
 ```
