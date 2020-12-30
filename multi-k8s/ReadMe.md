@@ -57,7 +57,8 @@ kubectl set image deployments/server-deployment server=stephengrider/multi-serve
 kubectl rollout restart deployment
 kubectl rollout restart deployment  [deployment]
 
-// port-forward, similar to NodePort svc, used for temp test
+// port-forward, similar to NodePort svc, useful for temp test
+kubectl port-forward [pod-name] [port:targetPort]
 kubectl port-forward nats-depl-b946946dd-2zns2 4222:4222
  
 
