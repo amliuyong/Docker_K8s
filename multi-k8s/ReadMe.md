@@ -710,6 +710,59 @@ spec:
 
 https://kubernetes.github.io/ingress-nginx/deploy/
 
+### ingress-nginx/ingress-nginx
+
+```
+# https://kubernetes.github.io/ingress-nginx/deploy/#docker-for-mac
+
+# helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+# helm repo update
+
+# helm install my-release ingress-nginx/ingress-nginx
+
+
+# sudo vi /etc/hosts, add below line
+# 127.0.0.1       posts.com
+```
+#### ingress ingress-srv example
+
+https://github.com/amliuyong/react-microservices/blob/main/01_A-Mini-Microservices-App/infra/k8s/ingress-srv.yaml
+
+```yaml
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-srv
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/use-regex: 'true'
+spec:
+  rules:
+    - host: posts.com
+      http:
+        paths:
+          - path: /posts/create
+            backend:
+              serviceName: posts-clusterip-srv
+              servicePort: 4000
+          - path: /posts
+            backend:
+              serviceName: query-srv
+              servicePort: 4002
+          - path: /posts/?(.*)/comments
+            backend:
+              serviceName: comments-srv
+              servicePort: 4001
+          - path: /?(.*)
+            backend:
+              serviceName: client-srv
+              servicePort: 3000
+```
+
+##  AWS Ingress
+
+### install aws-load-balancer-controller
+
 https://github.com/amliuyong/aws-eks-kubernetes-masterclass/tree/master/08-ELB-Application-LoadBalancers
 
  1.  ALB Install Ingress Controller
@@ -718,7 +771,6 @@ https://github.com/amliuyong/aws-eks-kubernetes-masterclass/tree/master/08-ELB-A
  2. AWS ALB Ingress Controller - Implement HTTP to HTTPS Redirect 
 https://kubernetes-sigs.github.io/aws-alb-ingress-controller/guide/ingress/annotation/
 
-### install aws-load-balancer-controller
 
 ```sh
 #!/usr/bin/env bash
