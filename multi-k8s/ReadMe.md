@@ -708,9 +708,12 @@ spec:
 ![](./jpgs/nginx-ingress.jpg)
 ![](./jpgs/ingress-on-google-cloud.jpg)
 
-https://kubernetes.github.io/ingress-nginx/deploy/
 
 ### ingress-nginx/ingress-nginx
+
+https://kubernetes.github.io/ingress-nginx/deploy/
+https://github.com/kubernetes/ingress-nginx/tree/master/deploy/static/provider/cloud
+
 
 ```
 # https://kubernetes.github.io/ingress-nginx/deploy/#docker-for-mac
