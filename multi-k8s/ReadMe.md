@@ -480,7 +480,15 @@ data:
                   
 ```
 
-# valueFrom - ref pod name as ClientId
+# valueFrom - ref pod name in Env as ClientId
+
+```yaml
+env:
+            - name: NATS_CLIENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+```
 
 ```yaml
 
