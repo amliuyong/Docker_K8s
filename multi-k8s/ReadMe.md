@@ -1203,10 +1203,14 @@ subjects:
   namespace: kubernetes-dashboard
 EOF
 
-
-
-
 ```
+## access dashboard
+```
+kubectl proxy
+
+http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/.
+```
+
 ## token for user `admin-user`
 ```
 kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}')
