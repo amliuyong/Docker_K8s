@@ -1170,6 +1170,7 @@ https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/cre
 ```
 
 // https://github.com/kubernetes/dashboard/blob/master/aio/deploy/recommended.yaml
+// https://github.com/amliuyong/Docker_K8s/blob/main/multi-k8s/k8s-dashboard.yaml
 
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.1.0/aio/deploy/recommended.yaml
 kubectl proxy
