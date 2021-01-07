@@ -35,6 +35,8 @@ kubectl describe pod [pod_name]
 kubectl logs <pod id>
 kubectl logs -f $(kubectl get po | egrep -o 'usermgmt-microservice-[A-Za-z0-9-]+')
 
+kubectl logs -f $(kubectl get pods | grep usermgmt-microservice | awk '{print $1 }')
+
 kubectl delete deployment client-deployment
 
 
