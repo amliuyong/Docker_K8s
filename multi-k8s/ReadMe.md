@@ -1149,6 +1149,7 @@ aws eks --region region-code update-kubeconfig --name <cluster_name> --role-arn 
 # ES on K8s, vagrant, skaffold
 https://github.com/amliuyong/esNote/blob/master/ESonK8s_Notes.md
 
+
 - skaffold
 https://github.com/amliuyong/react-microservices/blob/main/01_A-Mini-Microservices-App/skaffold.yaml
 
@@ -1156,6 +1157,12 @@ https://github.com/amliuyong/react-microservices/blob/main/01_A-Mini-Microservic
 skaffold dev
 
 ```
+
+# ElasticSearch - Fluentd - Kibana - on K8s cluster
+
+https://github.com/amliuyong/Logging-in-K8s-EFK
+
+
 
 # K8s Dashboard
 
