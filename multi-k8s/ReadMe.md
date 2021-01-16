@@ -1308,6 +1308,8 @@ CMD [ "nginx", "-g", "daemon off;" ]
 
 # EFS 
 
+https://github.com/amliuyong/react-microservices/blob/main/05_kub-aws-eks/kubernetes/users.yaml
+
 ```yaml
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
