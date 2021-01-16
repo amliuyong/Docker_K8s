@@ -1397,6 +1397,11 @@ spec:
 
 # EKS
 
-## EKS Helm Charts
+### EKS Helm Charts
+https://docs.aws.amazon.com/eks/latest/userguide/helm.html
+
 https://github.com/aws/eks-charts#eks-charts
+
+### create-public-private-vpc for EKS
+https://docs.aws.amazon.com/eks/latest/userguide/create-public-private-vpc.html
 
