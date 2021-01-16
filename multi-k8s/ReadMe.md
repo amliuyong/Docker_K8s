@@ -1224,4 +1224,64 @@ kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboar
 ```
 
 
+# Frontend
+
+- Nginx 
+
+```conf
+server {
+  listen 80;
+
+  location /api/ {
+    proxy_pass http://tasks-service.default:8000/;
+  }
+  
+  location / {
+    root /usr/share/nginx/html;
+    index index.html index.htm;
+    try_files $uri $uri/ /index.html =404;
+  }
+  
+  include /etc/nginx/extra-conf.d/*.conf;
+}server {
+  listen 80;
+
+  location /api/ {
+    proxy_pass http://tasks-service.default:8000/;
+  }
+  
+  location / {
+    root /usr/share/nginx/html;
+    index index.html index.htm;
+    try_files $uri $uri/ /index.html =404;
+  }
+  
+  include /etc/nginx/extra-conf.d/*.conf;
+}
+```
+- Dockerfile for react App
+```dockerfile
+FROM node:14-alpine as builder
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+FROM nginx:1.19-alpine
+
+COPY --from=builder /app/build /usr/share/nginx/html
+
+COPY conf/nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD [ "nginx", "-g", "daemon off;" ]
+```
+
 
