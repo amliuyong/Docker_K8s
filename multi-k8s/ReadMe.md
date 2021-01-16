@@ -1226,24 +1226,10 @@ kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboar
 
 # Frontend
 
-- Nginx 
+- Nginx example 
 
-```conf
+```config
 server {
-  listen 80;
-
-  location /api/ {
-    proxy_pass http://tasks-service.default:8000/;
-  }
-  
-  location / {
-    root /usr/share/nginx/html;
-    index index.html index.htm;
-    try_files $uri $uri/ /index.html =404;
-  }
-  
-  include /etc/nginx/extra-conf.d/*.conf;
-}server {
   listen 80;
 
   location /api/ {
@@ -1259,6 +1245,42 @@ server {
   include /etc/nginx/extra-conf.d/*.conf;
 }
 ```
+
+- Nginx example 2
+```conf
+upstream client {
+  server client:3000;
+}
+
+upstream api {
+  server api:5000;
+}
+
+server {
+  listen 80;
+
+  location / {
+    proxy_pass http://client;
+  }
+
+  location /sockjs-node {
+    proxy_pass http://client;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "Upgrade";
+  }
+
+  location /api {
+    rewrite /api/(.*) /$1 break;
+    proxy_pass http://api;
+  }
+}
+
+```
+```
+
+```
+
 - Dockerfile for react App
 ```dockerfile
 FROM node:14-alpine as builder
