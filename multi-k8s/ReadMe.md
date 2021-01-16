@@ -1308,6 +1308,11 @@ CMD [ "nginx", "-g", "daemon off;" ]
 
 # EFS 
 
+### Craete EFS and install CSI driver
+
+https://docs.aws.amazon.com/eks/latest/userguide/efs-csi.html
+
+### k8s config
 https://github.com/amliuyong/react-microservices/blob/main/05_kub-aws-eks/kubernetes/users.yaml
 
 ```yaml
