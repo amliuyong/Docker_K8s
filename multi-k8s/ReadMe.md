@@ -236,6 +236,13 @@ kubectl describe sa xray-daemon
 # List IAM Roles on eksdemo1 Cluster created with eksctl
 eksctl  get iamserviceaccount --cluster eksdemo1
 
+
+kubectl annotate serviceaccount -n <SERVICE_ACCOUNT_NAMESPACE> <SERVICE_ACCOUNT_NAME> \
+eks.amazonaws.com/role-arn=arn:aws:iam::<AWS_ACCOUNT_ID>:role/<IAM_ROLE_NAME>
+
+
+kubectl annotate serviceaccount xray-daemon eks.amazonaws.com/role-arn: arn:aws:iam::180789647333:role/eksctl-eksdemo1-addon-iamserviceaccount-defa-Role1-VR2R60B6MMDV
+
 ```
 ## ServiceAccount
 ```yaml
