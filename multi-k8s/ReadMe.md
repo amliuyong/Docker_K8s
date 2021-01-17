@@ -1254,6 +1254,8 @@ server {
 ```
 
 - Nginx example 2
+https://github.com/amliuyong/react-microservices/blob/main/04_kub-tasklist/frontend/conf/nginx.conf
+
 ```conf
 upstream client {
   server client:3000;
