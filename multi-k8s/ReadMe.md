@@ -1285,6 +1285,8 @@ server {
 
 ```
 - Nginx example 3
+https://github.com/amliuyong/istio-fleetman/blob/master/istio-fleetman-webapp-angular/nginx.conf
+
 ```conf
 events {
   worker_connections  4096;  ## Default: 1024
