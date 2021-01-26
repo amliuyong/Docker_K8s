@@ -1455,4 +1455,11 @@ https://github.com/aws/eks-charts#eks-charts
 
 ### create-public-private-vpc for EKS
 https://docs.aws.amazon.com/eks/latest/userguide/create-public-private-vpc.html
-
+ - All Regions other than China Regions.
+```
+https://s3.us-west-2.amazonaws.com/amazon-eks/cloudformation/2020-10-29/amazon-eks-vpc-private-subnets.yaml
+```
+- Beijing and Ningxia China Regions.
+```
+https://s3.cn-north-1.amazonaws.com.cn/amazon-eks/cloudformation/2020-10-29/amazon-eks-vpc-private-subnets.yaml
+```
