@@ -147,6 +147,36 @@ rolearn: arn:aws:iam::180789647333:role/eksctl-eksdemo1-nodegroup-eksdemo-NodeIn
 
 ```
 
+## EKS configmap aws-auth
+```
+kubectl -n kube-system describe configmap aws-auth
+
+Name:         aws-auth
+Namespace:    kube-system
+Labels:       <none>
+Annotations:  <none>
+
+Data
+====
+mapRoles:
+----
+- groups:
+  - system:masters
+  rolearn: arn:aws:iam::xxxxxxxxxxx:role/StepFunctionsWorkflowExecutionRole
+  username: StepFunctionsWorkflowExecutionRole
+- groups:
+  - system:bootstrappers
+  - system:nodes
+  rolearn: arn:aws:iam::xxxxxxxxxxx:role/EKSNodegroupRole
+  username: system:node:{{EC2PrivateDNSName}}
+- groups:
+  - system:masters
+  rolearn: arn:aws:iam::xxxxxxxxxxx:user/dev
+  username: dev
+
+Events:  <none>
+ ```
+
 
 ## Run the Project
 ```
@@ -216,6 +246,7 @@ http://<Service-Name>.<namespace>.svc.cluster.local/
 http://my-release-ingress-nginx-controller.default.svc.cluster.local
 
 ```
+
 
 ## Create iamserviceaccount
 ```
