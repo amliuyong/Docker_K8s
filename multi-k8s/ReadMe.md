@@ -64,6 +64,9 @@ kubectl port-forward [pod-name] [port:targetPort]
 kubectl port-forward nats-depl-b946946dd-2zns2 4222:4222
  
 
+kubectl -n kube-system get configmap
+kubectl -n kube-system eidt configmap aws-auth
+
 minikube dashboard
 ```
 
