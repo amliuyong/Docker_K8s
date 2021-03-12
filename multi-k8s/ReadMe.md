@@ -139,6 +139,9 @@ aws eks update-kubeconfig --name $cluster_name \
 
 
 ```
+## How do I resolve an unauthorized server error when I connect to the Amazon EKS API server
+https://aws.amazon.com/premiumsupport/knowledge-center/eks-api-server-unauthorized-error/
+
 
 ## Get the IAM role Worker Nodes 
 ```
